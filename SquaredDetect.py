@@ -5,10 +5,21 @@ def angle_cos(p0, p1, p2):
     d1, d2 = (p0-p1).astype('float'), (p2-p1).astype('float')
     return abs( np.dot(d1, d2) / np.sqrt( np.dot(d1, d1)*np.dot(d2, d2) ) )
     
+def distance(p0, p1):
+    return np.sqrt( (p0[0]-p1[0])**2 + (p0[1]-p1[1])**2)
+    
 class Detector:
     def __init__(self):
         self.maxCos = 0.2
         self.minArea = 100
+        self.relation = 0.197628458
+        self.relationEpsilon = 0.04
+        
+    def checkProportions(self, rect):
+        lenghts = [ distance(rect[i%4], rect[(i+1)%4]) for i in range(4)]
+        lenghts.sort()
+        print 'relation: ' + str(lenghts[0]/lenghts[3])
+        return np.abs(lenghts[0]/lenghts[3] - self.relation) < self.relationEpsilon       
 
     def find_squares(self, img):
         img = cv2.GaussianBlur(img, (5, 5), 0)
@@ -34,4 +45,16 @@ class Detector:
         return squares
 
     def detect(self, img):
-        return self.find_squares(img)
+        squares = self.find_squares(img)
+        res = []
+        for square in squares:
+            if self.checkProportions(square):
+                res.append(square)
+        return res
+        
+        
+        
+        
+        
+        
+        

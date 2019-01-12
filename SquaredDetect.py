@@ -37,9 +37,12 @@ class Detector:
         
     def checkProportions(self, rect):
         lenghts = [ distance(rect[i%4], rect[(i+1)%4]) for i in range(4)]
-        lenghts.sort()
+        #lenghts.sort()
         print 'relation: ' + str(lenghts[0]/lenghts[3])
-        return np.abs(lenghts[0]/lenghts[3] - self.relation) < self.relationEpsilon       
+        #return np.abs(lenghts[0]/lenghts[3] - self.relation) < self.relationEpsilon       
+        #return (lenghts[0]+lenghts[2]) / (lenghts[1]+lenghts[3]) < self.relationEpsilon
+        actualRelation = (lenghts[1]+lenghts[3]) / (lenghts[0]+lenghts[2])
+        return np.abs(actualRelation - self.relation) < self.relationEpsilon
 
     def find_squares(self, img):
         img = cv2.GaussianBlur(img, (5, 5), 0)
@@ -69,6 +72,7 @@ class Detector:
         for square in squares:
             if self.checkProportions(square):
                 res.append(square)
+        #TODO add NMS
         return res
         
         

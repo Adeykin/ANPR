@@ -1,5 +1,5 @@
 import SquaredDetect
-#import TesseractRecogniser
+import TesseractRecogniser
 import Warper
 import sys, os
 import cv2
@@ -23,12 +23,16 @@ def dumpRects(img, rects, path, imgName):
 def process(img):
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY);
     
-    detector = SquaredDetect.Detector()
+    detector = SquaredDetect.Detector() #TODO: Use global objects
+    recogniser = TesseractRecogniser.Recogniser()
     rects = detector.detect(gray)
     
-    for a in rects:
-        print a
-        cv2.polylines(img, rects, True, (0,0,255))
+    cv2.polylines(img, rects, True, (0,0,255))
+    for rect in rects:
+        text = recogniser.recognise(img, rect)
+        print rect
+        print('Recognised: ' + text)
+        cv2.putText(img, text, tuple(rect[0]), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1.0, color=(0,0,255))
     
     cv2.imshow('img', img)
     cv2.waitKey()

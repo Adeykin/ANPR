@@ -9,7 +9,7 @@ def angle_cos(p0, p1, p2):
 def distance(p0, p1):
     return np.sqrt( (p0[0]-p1[0])**2 + (p0[1]-p1[1])**2)
     
-def order_points_old(pts):
+def clockwisePointOrder(pts):
 	rect = np.zeros((4, 2), dtype="int32")
  
 	# the top-left point will have the smallest sum, whereas
@@ -52,7 +52,6 @@ class Detector:
                 else:
                     retval, bin = cv2.threshold(gray, thrs, 255, cv2.THRESH_BINARY)
                 tuple = cv2.findContours(bin, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-                #print len(tuple)
                 bin, contours, hierarchy = tuple
                 for cnt in contours:
                     cnt_len = cv2.arcLength(cnt, True)
@@ -61,7 +60,7 @@ class Detector:
                         cnt = cnt.reshape(-1, 2)
                         max_cos = np.max([angle_cos( cnt[i], cnt[(i+1) % 4], cnt[(i+2) % 4] ) for i in range(4)])
                         if max_cos < self.maxCos:
-                            squares.append(order_points_old(cnt))
+                            squares.append(clockwisePointOrder(cnt))
         return squares
 
     def detect(self, img):
@@ -71,7 +70,6 @@ class Detector:
             if self.checkProportions(square):
                 res.append(square)
         return res
-        
         
         
         

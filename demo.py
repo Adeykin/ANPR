@@ -1,27 +1,24 @@
 import SquaredDetect
+#import TesseractRecogniser
+import Warper
 import sys, os
 import cv2
 import numpy as np
 
 
 # 50x253
-def dumpRects(img, rects, path):
+def dumpRects(img, rects, path, imgName):
     if not path:
         return
-        
-    for rect in rects:
-        print 'dump rect: ' + str(rect)
-        srcTri = np.float32([rect[0], rect[1], rect[3]])
-        dstTri = np.float32([(0, 0), (253, 0), (0, 50) ])
-        print 'srcTri: ' + str(srcTri)
-        print 'dstTri: ' + str(dstTri)
-        warpMat = cv2.getAffineTransform( srcTri, dstTri );
-        warped = cv2.warpAffine( img, warpMat, (253,50) );
-        cv2.imshow('warp', warped)
-        cv2.waitKey()
-
-        
     
+    warper = Warper.Warper()
+    
+    for i, rect in enumerate(rects):
+        warp = warper.warp(img, rect)
+        #cv2.imshow('warp', warped)
+        #cv2.waitKey()
+        cv2.imwrite(path + '/' + str(i) + '_' + imgName, warp)
+
 
 def process(img):
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY);
@@ -47,22 +44,22 @@ if __name__ == '__main__':
     
     outputPath = None
     if len(sys.argv) == 3:
-        outputPath = sys.argv[2]        
+        outputPath = sys.argv[2]
     
     if os.path.isfile(path):
         vidcap = cv2.VideoCapture(path)
-        if vidcap: #video
+        if vidcap:            #video
             success,image = vidcap.read()
             while success:
-                process(image)
+                process(image.copy())
                 success,image = vidcap.read()
-        else:      #image
+        else:                 #image
             img = cv2.imread(path)    
             process(img)
     elif os.path.isdir(path): #directory
         for f in os.listdir(path):
             print 'try to read: ' + f
             img = cv2.imread(path + '/' + f)  
-            rects = process(img)
-            dumpRects(img, rects, outputPath)
+            rects = process(img.copy())
+            dumpRects(img, rects, outputPath, f)
 
